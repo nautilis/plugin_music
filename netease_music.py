@@ -68,11 +68,11 @@ class Music(Plugin):
             # e_context.action = EventAction.BREAK_PASS
 
     def get_help_text(self, verbose=False, **kwargs):
-        help_text = "music <指令>:内容"
-        help_text += "推荐音乐\n"
+        help_text = "推荐音乐\n"
         help_text += "music 推荐:一首粤语经典歌曲"
         help_text += "点歌\n"
         help_text += "music 点歌: 可惜我是水瓶座-杨千嬅"
+        return help_text
 
     def search_song(self, song_info):
         regex = r"\W?(?P<so>\w+)\W?\s?-\s?(?P<ar>\w+)"
