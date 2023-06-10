@@ -4,12 +4,10 @@
 - [x] 点歌
 
 ### 使用方式
-#### 部署网易云API 
-见：https://github.com/Binaryify/NeteaseCloudMusicApi
 #### 插件集成
-1. 把项目解压到chatgpt-on-wechat/plugins/music/ 目录下
+1. 把项目解压到chatgpt-on-wechat/plugins/plugin_music/ 目录下
 2. 配置 chatgpt-on-wechat/plugins/plugins.json
-```json
+ ```json
 {
   "Music": {
     "enabled": true,
@@ -17,7 +15,22 @@
   }
 }
 ```
-3. 重新启动chatgpt-on-wechat
+3. 安装插件的依赖
+```shell
+cd /chatgpt-on-wechat/plugins/plugin_music/
+pip3 install -r requirements.txt
+```
+4. 配置网易云邮箱和md5后的密码 /chatgpt-on-wechat/plugins/plugin_music/config.json
+```shell
+cp config.json.example config.json
+
+{
+  "username": "",
+  "passwd_md5":""
+}
+
+```
+5. 重新启动chatgpt-on-wechat
 #### 触发
 <关键字><空格><指令>:<内容>
 - 点歌: `music 点歌:可惜我是水瓶座-杨千嬅`
