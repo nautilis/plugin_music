@@ -91,7 +91,7 @@ class NetEaseApi():
             if resp["code"] == 200:
                 logging.info("login success, resp:{}".format(resp))
                 cd = cookie.get_dict()
-                with open("../login_cookie.txt", "w") as f:
+                with open("./login_cookie.txt", "w") as f:
                     f.write(json.dumps(cd))
             else:
                 logging.error("login error, resp:{}".format(resp))
