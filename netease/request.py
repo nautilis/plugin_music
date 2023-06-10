@@ -1,9 +1,8 @@
-import json
 import logging
-import random
+import os.path
 import time
 
-from encrypt import *
+from plugins.plugin_music.netease.encrypt import *
 
 
 def request(url, data, cookie):
@@ -69,15 +68,18 @@ class NetEaseApi():
         if len(cd) > 0:
             self.cookie = cd
 
-    def login(self, username: str, passwd_md5: str):
+    def login(self, username: str, passwd_md5: str, force=False):
         cookie_file = "./login_cookie.txt"
         cd = {}
-        with open(cookie_file, "r") as f:
-            cd = json.loads(f.read())
-        if len(cd) > 0:
-            return cd
+        if os.path.exists(cookie_file):
+            with open(cookie_file, "r") as f:
+                cd = json.loads(f.read())
+            if len(cd) > 0:
+                if not force:
+                    return cd
         url = "https://music.163.com/weapi/login/"
-        cookie = {"os": "pc", "appver": "2.9.7"}
+        # cookie = {"os": "pc", "appver": "2.9.7"}
+        cookie = {}
         data = {
             "username": username,
             "password": passwd_md5,
@@ -89,7 +91,7 @@ class NetEaseApi():
             if resp["code"] == 200:
                 logging.info("login success, resp:{}".format(resp))
                 cd = cookie.get_dict()
-                with open("./login_cookie.txt", "w") as f:
+                with open("../login_cookie.txt", "w") as f:
                     f.write(json.dumps(cd))
             else:
                 logging.error("login error, resp:{}".format(resp))
@@ -123,14 +125,14 @@ class NetEaseApi():
             "url": "/api/song/enhance/player/url",
             "realIP": "27.46.131.60",
         }
-        resp = request_eapi(url, data, self.cookie, opt)
+        resp, cookie, tips = request_eapi(url, data, self.cookie, opt)
         return resp
 
 
 if __name__ == "__main__":
     # test login
-    api = NetEaseApi("bevanpf@163.com", "a6979486d8684a9721bf6f939855803a")
+    api = NetEaseApi("xx@163.com", "684a9721bf6f939855803a")
     # resp = api.search("可惜我是水瓶座")
     # print("resp ==> {}".format(resp))
-    resp = api.song_url(["316654"])
+    resp = api.song_url(["1984475097"])
     print("resp ==> {}".format(resp))

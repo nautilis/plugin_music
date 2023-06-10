@@ -69,26 +69,24 @@ def weapi_encrypt(jsonbyte: bytes):
                                            urllib.parse.quote(encseckey, safe=" "))
     # return {"params": params, "encSecKey": encseckey}
 
+
 def eapi_encrypt(url: str, json_byte: bytes):
     message = "nobody{}use{}md5forencrypt".format(url, json_byte.decode("utf-8"))
     digest = hexlify(hashlib.md5(message.encode("utf-8")).digest()).decode("utf-8")
-    data = "{}-36cd479b6b5-{}-36cd479b6b5-{}".format(url,json_byte.decode("utf-8"), digest)
+    data = "{}-36cd479b6b5-{}-36cd479b6b5-{}".format(url, json_byte.decode("utf-8"), digest)
     encrypt = aes(data.encode("utf-8"), b'e82ckenh8dichen8', {})
     return "params={}".format(encrypt.upper().decode("utf-8"))
-
-
 
 
 def merge_cookie(cookies):
     cookie_list = []
     for k, v in cookies.items():
         cookie_list.append("{}={}".format(k, v))
-    return "'" + ";".join(cookie_list) + "'"
+    return ";".join(cookie_list)
 
 
 def get_user_agent():
     return random.choice(uas)
-
 
 
 if __name__ == "__main__":
@@ -105,4 +103,6 @@ if __name__ == "__main__":
     json_bts = '''{"username":"bevanpf@163.com","password":"a6979486d8684a9721bf6f939855803a","rememberLogin":"true","csrf_token":""}`'''
     print(weapi_encrypt(json_bts.encode("utf-8")))
 
-    print(eapi_encrypt("/api/song/enhance/player/url", '''{"ids":"[33894312]","br":999000,"header":{"appver":"8.7.01","versioncode":"140","buildver":"1668842016","resolution":"1920x1080","__csrf":"","os":"pc","requestId":"1668842016582_0788","MUSIC_A":"bf8bfeabb1aa84f9c8c3906c04a04fb864322804c83f5d607e91a04eae463c9436bd1a17ec353cf780b396507a3f7464e8a60f4bbc019437993166e004087dd32d1490298caf655c2353e58daa0bc13cc7d5c198250968580b12c1b8817e3f5c807e650dd04abd3fb8130b7ae43fcc5b"}}'''.encode("utf-8")))
+    print(eapi_encrypt("/api/song/enhance/player/url",
+                       '''{"ids":"[33894312]","br":999000,"header":{"appver":"8.7.01","versioncode":"140","buildver":"1668842016","resolution":"1920x1080","__csrf":"","os":"pc","requestId":"1668842016582_0788","MUSIC_A":"bf8bfeabb1aa84f9c8c3906c04a04fb864322804c83f5d607e91a04eae463c9436bd1a17ec353cf780b396507a3f7464e8a60f4bbc019437993166e004087dd32d1490298caf655c2353e58daa0bc13cc7d5c198250968580b12c1b8817e3f5c807e650dd04abd3fb8130b7ae43fcc5b"}}'''.encode(
+                           "utf-8")))

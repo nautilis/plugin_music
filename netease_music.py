@@ -1,10 +1,12 @@
+import os
+
+from plugins.plugin_music.netease.request import *
 import plugins
 from plugins import *
 from common.log import logger
 from bridge.bridge import Bridge
 from bridge.context import ContextType
 import re
-import requests
 from bridge.reply import Reply, ReplyType
 
 
@@ -20,6 +22,17 @@ class Music(Plugin):
     def __init__(self):
         super().__init__()
         self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_handle_context
+        conf = {}
+        curdir = os.path.dirname(__file__)
+        config_path = os.path.join(curdir, "config.json")
+        with open(config_path, "r", encoding="utf-8") as f:
+            conf = json.load(f)
+        username = conf.get("username", "")
+        passwd_md5 = conf.get("passwd_md5", "")
+        if username == "" or passwd_md5 == "":
+            logger.error("username or passwd_md5 not config, Music quit")
+            return
+        self.api = NetEaseApi(username, passwd_md5)
         logger.info("[Music] inited")
 
     def on_handle_context(self, e_context: EventContext):
@@ -45,10 +58,10 @@ class Music(Plugin):
             else:
                 chat = Bridge().get_bot("chat")
                 all_sessions = chat.sessions
-                msgs = all_sessions.session_query(query, e_context["context"]["session_id"]).messages
+                # msgs = all_sessions.session_query(query, e_context["context"]["session_id"]).messages
 
-                reply = chat.reply("以歌名 - 歌手的格式回复", e_context["context"])
-                logger.info("music receive => query:{}, messages:{}, reply:{}".format(query, msgs, reply))
+                reply = chat.reply(query +" 以歌名 - 歌手的格式回复", e_context["context"])
+                logger.info("music receive => query:{}, reply:{}".format(query, reply))
                 logger.info("")
                 url, name, ar = self.search_song(reply.content)
                 if url == "":
@@ -82,26 +95,36 @@ class Music(Plugin):
             ar = res.group("ar")
             print(song)
             print(ar)
-            resp = requests.get(url="http://127.0.0.1:3000/cloudsearch?type=1&keywords={}".format(song))
-            if resp.status_code == 200:
-                resp = resp.json()
-                if resp["code"] == 200:
-                    result = resp["result"]
-                    if result:
-                        songs = result["songs"]
-                        songid, name, ar = pick_song(songs, song, ar)
-                        if songid > 0:
-                            url = query_song_url(songid)
-                            return url, name, ar
-                        else:
-                            logger.info("song not found")
-                else:
-                    logger.info("search buss code not 200, code:{}".format(resp["code"]))
+            resp = self.api.search(song)
+            if resp["code"] == 200:
+                result = resp["result"]
+                if result:
+                    songs = result["songs"]
+                    songid, name, ar = pick_song(songs, song, ar)
+                    if songid > 0:
+                        url = self.query_song_url(songid)
+                        return url, name, ar
+                    else:
+                        logger.error("song not found")
             else:
-                logger.info("search http code not 200, code:{}".format(resp.status_code))
+                logger.error("search buss code not 200, code:{}, resp:{}".format(resp["code"], resp))
         else:
             logger.info("regex not match song and ar")
         return "", "", ""
+
+    def query_song_url(self, id):
+        urlRes = self.api.song_url([str(id)])
+        if urlRes["code"] == 200:
+            data = urlRes["data"]
+            if len(data) > 0:
+                url = data[0]["url"]
+                print("url => {}".format(url))
+                return url
+            else:
+                logger.info("query url data length is zero")
+        else:
+            logger.info("query url buss code not 200, code:{}".format(urlRes["code"]))
+        return ""
 
 
 def pick_song(songs, req_name, req_ar):
@@ -126,25 +149,6 @@ def pick_song_with_accuracy(songs, req_name, req_ar, accuracy):
             if contain(req_name, name):
                 return id, name, ar
     return -1, "", ""
-
-
-def query_song_url(id):
-    urlResp = requests.get(url="http://127.0.0.1:3000/song/url?id={}".format(id))
-    if urlResp.status_code == 200:
-        urlRes = urlResp.json()
-        if urlRes["code"] == 200:
-            data = urlRes["data"]
-            if len(data) > 0:
-                url = data[0]["url"]
-                print("url => {}".format(url))
-                return url
-            else:
-                logger.info("query url data length is zero")
-        else:
-            logger.info("query url buss code not 200, code:{}".format(urlRes["code"]))
-    else:
-        logger.info("query url http code not 200, code:{}".format(urlResp.status_code))
-    return ""
 
 
 def contain(a, b):
