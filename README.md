@@ -1,5 +1,5 @@
 ##  音乐插件
-这个项目是[chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat) 的音乐插件, 基于[网易云音乐API](https://github.com/Binaryify/NeteaseCloudMusicApi)（需要自己搭一个本地服务）,实现以下功能：
+这个项目是[chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat) 的音乐插件, 实现以下功能：
 - [x] 使用chatgpt 推荐音乐并发送播放链
 - [x] 点歌
 
